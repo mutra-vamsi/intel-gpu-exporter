@@ -1,6 +1,9 @@
 FROM ubuntu:jammy-20231004
 
-# Set environment variables for non-interactive installs
+ARG http_proxy
+ARG https_proxy
+ARG no_proxy
+
 ENV \
     DEBCONF_NONINTERACTIVE_SEEN="true" \
     DEBIAN_FRONTEND="noninteractive" \
@@ -8,12 +11,12 @@ ENV \
 
 WORKDIR /app
 
-# Change to a more reliable mirror
-RUN sed -i 's/archive.ubuntu.com/mirrors.ubuntu.com/g' /etc/apt/sources.list
+COPY . .
 
-# Increase timeout for apt-get operations to avoid network-related issues
-RUN apt-get -o Acquire::http::Timeout="60" -qq update \
-    && apt-get -o Acquire::http::Retries="3" -qq install --no-install-recommends -y \
+RUN \
+    apt-get -qq update \
+    && \
+    apt-get -qq install --no-install-recommends -y \
         intel-gpu-tools \
         python3-pip \
         tini \
@@ -27,10 +30,6 @@ RUN apt-get -o Acquire::http::Timeout="60" -qq update \
         /var/cache/apt/* \
         /var/tmp/*
 
-# Copy application files into the container
-COPY . .
-
-# Define the entrypoint and the command
 ENTRYPOINT ["/usr/bin/tini", "--", "/usr/bin/python3"]
 CMD ["/app/exporter.py"]
 
@@ -38,4 +37,3 @@ LABEL \
     org.opencontainers.image.title="intel-gpu-exporter" \
     org.opencontainers.image.authors="mutra-vamsi <vamsimutra@gmail.com>" \
     org.opencontainers.image.source="https://github.com/mutra-vamsi/intel-gpu-exporter"
-
