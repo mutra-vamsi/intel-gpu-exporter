@@ -80,7 +80,7 @@ if __name__ == '__main__':
     # Get refresh period from environment variable or default to 5000ms
     period = os.getenv("REFRESH_PERIOD_MS", 5000)
 
-    cmd = 'sudo /usr/bin/intel_gpu_top -J -s {}'.format(int(period))
+    cmd = 'intel_gpu_top -J -s {}'.format(int(period))
     process = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # Log the start of the process
